@@ -33,7 +33,31 @@ window.addEventListener('load', function() {
 
   // Controls the main character, animate player sprite sheet
   class Player{
+    constructor(game){
+      // convert game object that is passed in, into a property of the player class called this.game
+      this.game = game
 
+      // Player sprite sheet
+      this.width = 120;
+      this.height = 190;
+
+      // Player start position
+      this.x = 20;
+      this.y = 100;
+
+      // Player speed
+      this.speedY = 0;
+    }
+
+    // Moves the player around the screen
+    update(){
+      this.y += this.speedY;
+    }
+
+    // Draws grapics representing the player, context will specify which canvas element to draw on, better to use context rather than pulling ctx variable from outside into this object
+    draw(context){
+      context.fillRect(this.x, this.y, this.width, this.height);
+    }
   }
 
   // Main blueprint for all enemies
@@ -58,6 +82,26 @@ window.addEventListener('load', function() {
 
   // Brain of the game, handles all game logic
   class Game {
+    // Needs width and height of the canvas as arguments
+    constructor(width, height){
+      // convert width and height into class properties to ensure they match the size of the canvas element.
+      this.width = width;
+      this.height = height;
 
+      // Create a new player object (an instance of Player class), will find Player class, runs it's constructor, and passes in the entire Game object as an argument.
+      this.player = new Player(this); // `this` arg refers to the entire Game object
+    }
+
+    update(){
+      this.player.update(); // takes this.player property, and calls an instance of Player method, and calls its update method.
+    }
+
+    draw(context){
+      this.player.draw(context); //
+    }
   }
+
+  // Create a new instance of the Game class
+  const game = new Game(canvas.width, canvas.height); // pass in canvas width and height as arguments from "Game Area" above
+  
 });
