@@ -15,4 +15,49 @@ window.addEventListener('load', function() {
   // Game Area
   canvas.width = 1500;
   canvas.height = 500;
+
+  // Keeps track of user input (keyboard)
+  class InputHandler {
+
+  }
+
+  // Handles player lazers
+  class Projectile {
+
+  }
+
+  // Handles falling screws, cogs, and bolts from damaged enemies
+  class Particle {
+
+  }
+
+  // Controls the main character, animate player sprite sheet
+  class Player{
+
+  }
+
+  // Main blueprint for all enemies
+  class Enemy {
+
+  }
+
+  // Handles individual background layers in multilayered parallax background
+  class Layer {
+
+  }
+
+  // Pulls all layer objects together to animate the entire game world
+  class Background {
+
+  }
+
+  // Will draw score, timer and other info to be displayed for the user
+  class UI {
+
+  }
+
+  // Brain of the game, handles all game logic
+  class Game {
+
+  }
 });
