@@ -185,11 +185,31 @@ window.addEventListener('load', function() {
       context.shadowOffsetY = 2
       context.shadowColor = 'black'
       context.font = this.fontSize + 'px ' + this.fontFamily;
-      //score
+
+      // score
       context.fillText('Score: ' + this.game.score, 20, 40)
-      //ammo
+
+      // ammo
       for(let i = 0; i < this.game.ammo; i++){
         context.fillRect(20 + 5 * i, 50, 3, 20); // uses index from for loop to space UI ammo elements out (5 * i), plus 20px left margin
+      }
+
+      // game over messages
+      if(this.game.gameOver){
+        context.textAlign = 'center'
+        let message1;
+        let message2;
+        if(this.game.score > this.game.winningScore){
+          message1 = 'You Win!'
+          message2 = 'Well Done!'
+        } else {
+          message1 = 'You Lose!'
+          message2 = 'Try Again next time!'
+        }
+        context.font = '50px ' + this.fontFamily;
+        context.fillText(message1, this.game.width * 0.5, this.game.height * 0.5 - 40); // -40 moves the text up 40px
+        context.font = '25px ' + this.fontFamily;
+        context.fillText(message2, this.game.width * 0.5, this.game.height * 0.5 + 40); // +40 moves the text down 40px
       }
       context.restore()                         // restore the canvas to the state it was in before the save method
     }
@@ -218,8 +238,8 @@ window.addEventListener('load', function() {
       this.ammoTimer = 0;
       this.ammoInterval = 500;                 // time in milliseconds between ammo replinishment
       this.gameOver = false;
-      this.score = 0
-      this.winningScore = 10
+      this.score = 0;
+      this.winningScore = 10;
     }
     update(deltaTime){
       this.player.update(); // takes this.player property, and calls an instance of Player method, and calls its update method.
@@ -243,7 +263,7 @@ window.addEventListener('load', function() {
         this.player.projectiles.forEach(projectile => {
           if (this.checkCollision(projectile, enemy)) {
             enemy.lives--;
-            enemy.markedForDeletion = true;
+            projectile.markedForDeletion = true;
             if(enemy.lives <= 0){
               enemy.markedForDeletion = true;
               this.score += enemy.score;
