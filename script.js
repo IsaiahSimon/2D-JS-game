@@ -46,7 +46,7 @@ window.addEventListener('load', function() {
       this.y = 100;
 
       // Player speed
-      this.speedY = 0;
+      this.speedY = 0; // -1 means player will move up, 1 means player will move down, 0 means player will not move
     }
 
     // Moves the player around the screen
@@ -103,5 +103,17 @@ window.addEventListener('load', function() {
 
   // Create a new instance of the Game class
   const game = new Game(canvas.width, canvas.height); // pass in canvas width and height as arguments from "Game Area" above
-  
+
+  // Animation Loop
+  function animate(){
+    // Clear the canvas between frames
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    game.update();
+    game.draw(ctx);
+
+    requestAnimationFrame(animate); // tells the browser that you wish to perform an animation and requests that the browser call a specified function to update an animation before the next repaint.
+  }
+
+  animate();
 });
