@@ -18,7 +18,24 @@ window.addEventListener('load', function() {
 
   // Keeps track of user input (keyboard)
   class InputHandler {
+    constructor(game){
+      this.game = game;                                   // convert into a property of the class
+      window.addEventListener('keydown', e => {           // listen for keydown event, arrow function needed to bind this.game to the class
+        if((  (e.key === 'ArrowUp') ||
+              (e.key === 'ArrowDown')
 
+        ) && this.game.keys.indexOf(e.key) === -1){       // only if key is not already in the array, add it
+          this.game.keys.push(e.key);
+        }
+        console.log(e.key);                               // log the key pressed
+      });
+      window.addEventListener('keyup', e => {
+        if(this.game.keys.indexOf(e.key) > -1){                     // if the key pressed is in the array
+          this.game.keys.splice(this.game.keys.indexOf(e.key), 1);  // remove the key from the array, (startIndex, deleteCount)
+        }
+        console.log(this.game.keys);                                  // log the array
+      })
+    }
   }
 
   // Handles player lazers
@@ -46,12 +63,21 @@ window.addEventListener('load', function() {
       this.y = 100;
 
       // Player speed
-      this.speedY = 0; // -1 means player will move up, 1 means player will move down, 0 means player will not move
+      this.speedY = 0;        // -1 means player will move up, 1 means player will move down, 0 means player will not move
+      this.maxSpeed = 5;      // max speed player can move, allows dynamic speed changes in update method for power ups
     }
 
     // Moves the player around the screen
     update(){
-      this.y += this.speedY;
+      if(this.game.keys.includes('ArrowUp')){     // change player position based on key pressed
+        this.speedY = -this.maxSpeed;
+      } else if (this.game.keys.includes('ArrowDown')){
+        this.speedY = this.maxSpeed;
+      } else {
+        this.speedY = 0
+      }
+
+      this.y += this.speedY;                     // update player position
     }
 
     // Draws grapics representing the player, context will specify which canvas element to draw on, better to use context rather than pulling ctx variable from outside into this object
@@ -89,7 +115,10 @@ window.addEventListener('load', function() {
       this.height = height;
 
       // Create a new player object (an instance of Player class), will find Player class, runs it's constructor, and passes in the entire Game object as an argument.
-      this.player = new Player(this); // `this` arg refers to the entire Game object
+      this.player = new Player(this);           // `this` arg refers to the entire Game class
+
+      this.input = new InputHandler(this);      // `this` arg refers to the entire Game class
+      this.keys = [];                           // array to store all keys pressed by user
     }
 
     update(){
