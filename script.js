@@ -194,6 +194,10 @@ window.addEventListener('load', function() {
         context.fillRect(20 + 5 * i, 50, 3, 20); // uses index from for loop to space UI ammo elements out (5 * i), plus 20px left margin
       }
 
+      // game timer
+      const formattedTime = (this.game.gameTime * 0.001).toFixed(1) // .toFixed formats a number using fixed point notation
+      context.fillText('Time: ' + formattedTime, 20, 100)
+
       // game over messages
       if(this.game.gameOver){
         context.textAlign = 'center'
@@ -240,8 +244,16 @@ window.addEventListener('load', function() {
       this.gameOver = false;
       this.score = 0;
       this.winningScore = 10;
+      this.gameTime = 0;
+      this.gameTimeLimit = 5000;
     }
     update(deltaTime){
+      if(!this.gameOver){ // keeps track of time from start of game, and ends game if time limit is reached
+        this.gameTime += deltaTime;
+      }
+      if(this.gameTime > this.gameTimeLimit){
+        this.gameOver = true;
+      }
       this.player.update(); // takes this.player property, and calls an instance of Player method, and calls its update method.
       //console.log(this.ammo, this.ammoTimer, this.ammoInterval) // test ammo counter, disabled for performance
 
@@ -266,7 +278,9 @@ window.addEventListener('load', function() {
             projectile.markedForDeletion = true;
             if(enemy.lives <= 0){
               enemy.markedForDeletion = true;
-              this.score += enemy.score;
+              if (!this.gameOver){
+                this.score += enemy.score
+              }
               if(this.score > this.winningScore){
                 this.gameOver = true;
               }
