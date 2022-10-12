@@ -162,9 +162,22 @@ window.addEventListener('load', function() {
       this.keys = [];                           // array to store all keys pressed by user
 
       this.ammo = 20;                           // ammo counter
+      this.maxAmmo = 50;
+      this.ammoTimer = 0;
+      this.ammoInterval = 500;                 // time in milliseconds between ammo replinishment
     }
-    update(){
+    update(deltaTime){
       this.player.update(); // takes this.player property, and calls an instance of Player method, and calls its update method.
+      //console.log(this.ammo, this.ammoTimer, this.ammoInterval) // test ammo counter, disabled for performance
+
+      if(this.ammoTimer > this.ammoInterval){
+        if(this.ammo < this.maxAmmo){
+          this.ammo++
+        }
+        this.ammoTimer = 0
+      } else {
+        this.ammoTimer += deltaTime
+      }
     }
     draw(context){
       this.player.draw(context); //
@@ -173,17 +186,22 @@ window.addEventListener('load', function() {
 
   // Create a new instance of the Game class
   const game = new Game(canvas.width, canvas.height); // pass in canvas width and height as arguments from "Game Area" above
+  let lastTime = 0; // used to store time between frames
 
   // Animation Loop
-  function animate(){
+  function animate(timeStamp){
+    const deltaTime = timeStamp - lastTime;               // calculate time between frames
+    // console.log(deltaTime)                             // log time between frames, disabled for performance
+    lastTime = timeStamp;
     // Clear the canvas between frames
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    game.update();
+    game.update(deltaTime);
     game.draw(ctx);
 
-    requestAnimationFrame(animate); // tells the browser that you wish to perform an animation and requests that the browser call a specified function to update an animation before the next repaint.
+    requestAnimationFrame(animate);                      // tells the browser that you wish to perform an animation and requests that the browser call a specified function to update an animation before the next repaint.
+    // requestAnimationFrame has a special feature:  auto passes a time stamp as an argument to the function it calls (animate).
   }
 
-  animate();
+  animate(0);
 });
