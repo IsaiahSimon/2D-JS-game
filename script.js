@@ -129,7 +129,35 @@ window.addEventListener('load', function() {
 
   // Main blueprint for all enemies
   class Enemy {
-
+    constructor(game){
+      this.game = game;
+      this.x = this.game.width                      // enemy starts at the right side of the screen
+      this.speedX = Math.random() * -1.5 - 0.5;     // random enemy speed
+      this.markedForDeletion = false;
+      this.lives = 5;
+      this.score = this.lives;
+    }
+    update(){
+      this.x += this.speedX                         // update enemy position
+      if(this.x + this.width < 0){                  // if enemy is off the screen, mark it for deletion
+        this.markedForDeletion = true
+      }
+    }
+    draw(context){
+      context.fillStyle = 'red'
+      context.fillRect(this.x, this.y, this.width, this.height)
+      context.fillStyle = 'black'
+      context.font = '20px Helvetica'
+      context.fillText(this.lives, this.x, this.y)
+    }
+  }
+  class Angler1 extends Enemy {                     // Inherits from Enemy class
+    constructor(game){
+      super(game)                                   // calls the constructor of the parent class first
+      this.width = 228 * 0.2;
+      this.height = 169 * 0.2;
+      this.y = Math.random() * (this.game.height * 0.9 - this.height); // random y position between 0 to 90% from the top of the screen, offset by the height of the enemy
+    }
   }
 
   // Handles individual background layers in multilayered parallax background
@@ -173,11 +201,15 @@ window.addEventListener('load', function() {
       this.input = new InputHandler(this);      // `this` arg refers to the entire Game class
       this.ui = new UI(this);                   // `this` arg refers to the entire Game class
       this.keys = [];                           // array to store all keys pressed by user
+      this.enemies = [];
+      this.enemyTimer = 0;
+      this.enemyInterval = 1000;
 
       this.ammo = 20;                           // ammo counter
       this.maxAmmo = 50;
       this.ammoTimer = 0;
       this.ammoInterval = 500;                 // time in milliseconds between ammo replinishment
+      this.gameOver = false;
     }
     update(deltaTime){
       this.player.update(); // takes this.player property, and calls an instance of Player method, and calls its update method.
@@ -191,10 +223,52 @@ window.addEventListener('load', function() {
       } else {
         this.ammoTimer += deltaTime
       }
+
+      // Cycle through all enemies in enemies array, and call their update method
+      this.enemies.forEach(enemy => {
+        enemy.update();
+        if(this.checkCollision(this.player, enemy)){
+          enemy.markedForDeletion = true;
+        }
+        this.player.projectiles.forEach(projectile => {
+          if (this.checkCollision(projectile, enemy)) {
+            enemy.lives--;
+            enemy.markedForDeletion = true;
+            if(enemy.lives <= 0){
+              enemy.markedForDeletion = true;
+              this.score += enemy.score;
+            }
+          }
+        })
+      })
+      this.enemies = this.enemies.filter(enemy => !enemy.markedForDeletion) // filter out enemies that are marked for deletion, and overwrite the enemies array with the new array
+      if(this.enemyTimer > this.enemyInterval && !this.gameOver){
+        this.addEnemy()
+        this.enemyTimer = 0
+      } else {
+        this.enemyTimer += deltaTime
+      }
     }
     draw(context){
       this.player.draw(context);
       this.ui.draw(context);
+      this.enemies.forEach(enemy => {
+        enemy.draw(context);
+      })
+    }
+    // Adds enemies to the game
+    addEnemy(){
+      this.enemies.push(new Angler1(this));
+      //console.log(this.enemies)
+    }
+    checkCollision(rect1, rect2){
+      // check if two rectangles are colliding
+      return (
+        rect1.x < rect2.x + rect2.width &&
+        rect1.x + rect1.width > rect2.x &&
+        rect1.y < rect2.y + rect2.height &&
+        rect1.y + rect1.height > rect2.y
+      )
     }
   }
 
