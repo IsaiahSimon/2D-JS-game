@@ -144,7 +144,19 @@ window.addEventListener('load', function() {
 
   // Will draw score, timer and other info to be displayed for the user
   class UI {
-
+    constructor(game){
+      this.game = game;
+      this.fontSize = 25;
+      this.fontFamily = 'Helvetica';
+      this.color = 'yellow';
+    }
+    draw(context){
+      //ammo
+      context.fillStyle = this.color;
+      for(let i = 0; i < this.game.ammo; i++){
+        context.fillRect(20 + 5 * i, 50, 3, 20); // uses index from for loop to space UI ammo elements out (5 * i), plus 20px left margin
+      }
+    }
   }
 
   // Brain of the game, handles all game logic
@@ -159,6 +171,7 @@ window.addEventListener('load', function() {
       this.player = new Player(this);           // `this` arg refers to the entire Game class
 
       this.input = new InputHandler(this);      // `this` arg refers to the entire Game class
+      this.ui = new UI(this);                   // `this` arg refers to the entire Game class
       this.keys = [];                           // array to store all keys pressed by user
 
       this.ammo = 20;                           // ammo counter
@@ -180,7 +193,8 @@ window.addEventListener('load', function() {
       }
     }
     draw(context){
-      this.player.draw(context); //
+      this.player.draw(context);
+      this.ui.draw(context);
     }
   }
 
