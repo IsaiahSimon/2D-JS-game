@@ -176,14 +176,22 @@ window.addEventListener('load', function() {
       this.game = game;
       this.fontSize = 25;
       this.fontFamily = 'Helvetica';
-      this.color = 'yellow';
+      this.color = 'white';
     }
     draw(context){
-      //ammo
+      context.save()                             // save the current state of the canvas
       context.fillStyle = this.color;
+      context.shadowOffsetX = 2
+      context.shadowOffsetY = 2
+      context.shadowColor = 'black'
+      context.font = this.fontSize + 'px ' + this.fontFamily;
+      //score
+      context.fillText('Score: ' + this.game.score, 20, 40)
+      //ammo
       for(let i = 0; i < this.game.ammo; i++){
         context.fillRect(20 + 5 * i, 50, 3, 20); // uses index from for loop to space UI ammo elements out (5 * i), plus 20px left margin
       }
+      context.restore()                         // restore the canvas to the state it was in before the save method
     }
   }
 
@@ -210,6 +218,8 @@ window.addEventListener('load', function() {
       this.ammoTimer = 0;
       this.ammoInterval = 500;                 // time in milliseconds between ammo replinishment
       this.gameOver = false;
+      this.score = 0
+      this.winningScore = 10
     }
     update(deltaTime){
       this.player.update(); // takes this.player property, and calls an instance of Player method, and calls its update method.
@@ -237,6 +247,9 @@ window.addEventListener('load', function() {
             if(enemy.lives <= 0){
               enemy.markedForDeletion = true;
               this.score += enemy.score;
+              if(this.score > this.winningScore){
+                this.gameOver = true;
+              }
             }
           }
         })
