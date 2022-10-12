@@ -162,12 +162,48 @@ window.addEventListener('load', function() {
 
   // Handles individual background layers in multilayered parallax background
   class Layer {
+    constructor(game, image, speedModifier){
+      this.game = game;
+      this.image = image;
+      this.speedModifier = speedModifier;
+      this.width = 1768
+      this.height = 500
+      this.x = 0
+      this.y = 0
+    }
+    update(){
+      if(this.x <= -this.width){
+        this.x = 0
+      }
+      this.x -= this.game.speed * this.speedModifier
 
+    }
+    draw(context){
+      context.drawImage(this.image, this.x, this.y)
+      context.drawImage(this.image, this.x + this.width, this.y) // creates a 2nd image to the right of the first image, so that the image appears to be infinite
+    }
   }
 
-  // Pulls all layer objects together to animate the entire game world
+  // Handles all layers to create the game world
   class Background {
-
+    constructor(game){
+      this.game = game;
+      this.image1 = document.getElementById('layer1')           // pull image from html
+      this.image2 = document.getElementById('layer2')
+      this.image3 = document.getElementById('layer3')
+      this.image4 = document.getElementById('layer4')
+      this.layer1 = new Layer(this.game, this.image1, 0.2);       // create layer object with a speed modifier of 1
+      this.layer2 = new Layer(this.game, this.image2, 0.4);
+      this.layer3 = new Layer(this.game, this.image3, 1);
+      this.layer4 = new Layer(this.game, this.image4, 1.5);
+      this.layers = [this.layer1, this.layer2, this.layer3]   // holds all layers except the foreground, otherwise it gets drawn behind the player
+    }
+    update(){
+      this.layers.forEach(layer => layer.update())
+    }
+    draw(context){
+      this.layers.forEach(layer => layer.draw(context))
+    }
   }
 
   // Will draw score, timer and other info to be displayed for the user
@@ -226,6 +262,7 @@ window.addEventListener('load', function() {
       // convert width and height into class properties to ensure they match the size of the canvas element.
       this.width = width;
       this.height = height;
+      this.background = new Background(this)
 
       // Create a new player object (an instance of Player class), will find Player class, runs it's constructor, and passes in the entire Game object as an argument.
       this.player = new Player(this);           // `this` arg refers to the entire Game class
@@ -246,6 +283,7 @@ window.addEventListener('load', function() {
       this.winningScore = 10;
       this.gameTime = 0;
       this.gameTimeLimit = 5000;
+      this.speed = 1
     }
     update(deltaTime){
       if(!this.gameOver){ // keeps track of time from start of game, and ends game if time limit is reached
@@ -254,6 +292,9 @@ window.addEventListener('load', function() {
       if(this.gameTime > this.gameTimeLimit){
         this.gameOver = true;
       }
+      this.background.update() // update background layers
+      this.background.layer4.update() // draws the foreground layer last, so that it appears on top of the player layer
+
       this.player.update(); // takes this.player property, and calls an instance of Player method, and calls its update method.
       //console.log(this.ammo, this.ammoTimer, this.ammoInterval) // test ammo counter, disabled for performance
 
@@ -297,11 +338,13 @@ window.addEventListener('load', function() {
       }
     }
     draw(context){
+      this.background.draw(context)
       this.player.draw(context);
       this.ui.draw(context);
       this.enemies.forEach(enemy => {
         enemy.draw(context);
       })
+      this.background.layer4.draw(context)
     }
     // Adds enemies to the game
     addEnemy(){
