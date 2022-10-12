@@ -20,28 +20,50 @@ window.addEventListener('load', function() {
   class InputHandler {
     constructor(game){
       this.game = game;                                   // convert into a property of the class
+
       window.addEventListener('keydown', e => {           // listen for keydown event, arrow function needed to bind this.game to the class
         if((  (e.key === 'ArrowUp') ||
               (e.key === 'ArrowDown')
-
         ) && this.game.keys.indexOf(e.key) === -1){       // only if key is not already in the array, add it
           this.game.keys.push(e.key);
+        } else if (e.key === ' '){
+          this.game.player.shootTop()
         }
-        console.log(e.key);                               // log the key pressed
       });
+
       window.addEventListener('keyup', e => {
         if(this.game.keys.indexOf(e.key) > -1){                     // if the key pressed is in the array
           this.game.keys.splice(this.game.keys.indexOf(e.key), 1);  // remove the key from the array, (startIndex, deleteCount)
         }
-        console.log(this.game.keys);                                  // log the array
       })
     }
   }
 
   // Handles player lazers
   class Projectile {
-
+    constructor(game, x, y){
+      this.game = game;
+      this.x = x;
+      this.y = y;
+      this.width = 10
+      this.height = 3
+      this.speed = 3
+      this.markedForDeletion = false
   }
+  update(){
+    this.x += this.speed
+    if(this.x > this.game.width * 0.8){           // sets the range of the projectile based on the game width
+      this.markedForDeletion = true
+    }
+  }
+  draw(context){
+    context.fillStyle = 'yellow'                 // color of the projectile
+    context.fillRect(this.x, this.y, this.width, this.height)
+  }
+
+}
+
+
 
   // Handles falling screws, cogs, and bolts from damaged enemies
   class Particle {
@@ -65,8 +87,9 @@ window.addEventListener('load', function() {
       // Player speed
       this.speedY = 0;        // -1 means player will move up, 1 means player will move down, 0 means player will not move
       this.maxSpeed = 5;      // max speed player can move, allows dynamic speed changes in update method for power ups
-    }
 
+      this.projectiles = []   // holds all currently active projectile objects
+    }
     // Moves the player around the screen
     update(){
       if(this.game.keys.includes('ArrowUp')){     // change player position based on key pressed
@@ -78,11 +101,29 @@ window.addEventListener('load', function() {
       }
 
       this.y += this.speedY;                     // update player position
-    }
 
+      // handle projectiles
+      this.projectiles.forEach(projectile => {
+        projectile.update()
+      })
+      this.projectiles = this.projectiles.filter(projectile => !projectile.markedForDeletion) // filter out projectiles that are marked for deletion, and overwrite the projectiles array with the new array
+    }
     // Draws grapics representing the player, context will specify which canvas element to draw on, better to use context rather than pulling ctx variable from outside into this object
     draw(context){
+      context.fillStyle = 'black'               // prevents yellow style from projectice class from affecting player
       context.fillRect(this.x, this.y, this.width, this.height);
+      // handle projectiles
+      this.projectiles.forEach(projectile => {
+        projectile.draw(context)
+      })
+    }
+    shootTop(){
+      if(this.game.ammo > 0){                                                // only shoot if ammo is greater than 0
+        this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 30))
+        this.game.ammo--                                                     // decrement ammo
+
+      }
+
     }
   }
 
@@ -119,12 +160,12 @@ window.addEventListener('load', function() {
 
       this.input = new InputHandler(this);      // `this` arg refers to the entire Game class
       this.keys = [];                           // array to store all keys pressed by user
-    }
 
+      this.ammo = 20;                           // ammo counter
+    }
     update(){
       this.player.update(); // takes this.player property, and calls an instance of Player method, and calls its update method.
     }
-
     draw(context){
       this.player.draw(context); //
     }
