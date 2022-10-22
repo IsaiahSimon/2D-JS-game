@@ -28,6 +28,8 @@ window.addEventListener('load', function() {
           this.game.keys.push(e.key);
         } else if (e.key === ' '){
           this.game.player.shootTop()
+        } else if (e.key === 'd'){
+          this.game.debug = !this.game.debug;
         }
       });
 
@@ -124,8 +126,9 @@ window.addEventListener('load', function() {
     }
     // Draws grapics representing the player, context will specify which canvas element to draw on, better to use context rather than pulling ctx variable from outside into this object
     draw(context){
-      context.fillStyle = 'black'               // prevents yellow style from projectice class from affecting player
-      context.fillRect(this.x, this.y, this.width, this.height);
+      if (this.game.debug){
+        context.strokeRect(this.x, this.y, this.width, this.height);
+      }
       context.drawImage(this.image, this.frameX * this.width, this.frameY * this.height, this.width, this.height, this.x, this.y, this.width, this.height) // draw player image, using 9 argument version of .drawImage. (1 img + 4 source + 4 destination)
       // handle projectiles
       this.projectiles.forEach(projectile => {
@@ -299,6 +302,7 @@ window.addEventListener('load', function() {
       this.gameTime = 0;
       this.gameTimeLimit = 5000;
       this.speed = 1
+      this.debug = true
     }
     update(deltaTime){
       if(!this.gameOver){ // keeps track of time from start of game, and ends game if time limit is reached
