@@ -98,9 +98,14 @@ window.addEventListener('load', function() {
       this.projectiles = []   // holds all currently active projectile objects
 
       this.image = document.getElementById('player') // get player image from html
+
+      // Power up
+      this.powerUp = false;   // boolean to determine if power up is active
+      this.powerUpTimer = 0;  // timer to keep track of how long power up is active
+      this.powerUpLimit = 10000; // how long power up is active
     }
     // Moves the player around the screen
-    update(){
+    update(deltaTime){
       if(this.game.keys.includes('ArrowUp')){     // change player position based on key pressed
         this.speedY = -this.maxSpeed;
       } else if (this.game.keys.includes('ArrowDown')){
@@ -123,25 +128,50 @@ window.addEventListener('load', function() {
       } else {
         this.frameX = 0
       }
+
+      // handle power up
+      if(this.powerUp){
+        if (this.powerUpTimer > this.powerUpLimit) {
+          this.powerUpTimer = 0;          // reset timer
+          this.powerUp = false;           // turn off power up
+          this.frameY = 0                 // reset to normal animation
+        } else {
+          this.powerUpTimer += deltaTime  // increment timer
+          this.frameY = 1                 // change animation to power up
+          this.game.ammo += 0.1           // increase ammo
+        }
+      }
     }
     // Draws grapics representing the player, context will specify which canvas element to draw on, better to use context rather than pulling ctx variable from outside into this object
     draw(context){
       if (this.game.debug){
         context.strokeRect(this.x, this.y, this.width, this.height);
       }
-      context.drawImage(this.image, this.frameX * this.width, this.frameY * this.height, this.width, this.height, this.x, this.y, this.width, this.height) // draw player image, using 9 argument version of .drawImage. (1 img + 4 source + 4 destination)
       // handle projectiles
       this.projectiles.forEach(projectile => {
         projectile.draw(context)
       })
+      context.drawImage(this.image, this.frameX * this.width, this.frameY * this.height, this.width, this.height, this.x, this.y, this.width, this.height) // draw player image, using 9 argument version of .drawImage. (1 img + 4 source + 4 destination)
     }
     shootTop(){
       if(this.game.ammo > 0){                                                // only shoot if ammo is greater than 0
         this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 30))
         this.game.ammo--                                                     // decrement ammo
-
+      }
+      if(this.powerUp){                                                      // if power up is active, shoot 2 projectiles
+        this.shootBottom()
       }
 
+    }
+    shootBottom(){
+      if (this.game.ammo > 0) {                                                // only shoot if ammo is greater than 0
+        this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 175))
+      }
+    }
+    enterPowerUp(){
+      this.powerUpTimer = 0;    // reset timer
+      this.powerUp = true;      // turn on power up
+      this.game.ammo = this.game.maxAmmo // reset ammo
     }
   }
 
@@ -283,11 +313,6 @@ window.addEventListener('load', function() {
       // score
       context.fillText('Score: ' + this.game.score, 20, 40)
 
-      // ammo
-      for(let i = 0; i < this.game.ammo; i++){
-        context.fillRect(20 + 5 * i, 50, 3, 20); // uses index from for loop to space UI ammo elements out (5 * i), plus 20px left margin
-      }
-
       // game timer
       const formattedTime = (this.game.gameTime * 0.001).toFixed(1) // .toFixed formats a number using fixed point notation
       context.fillText('Time: ' + formattedTime, 20, 100)
@@ -308,6 +333,14 @@ window.addEventListener('load', function() {
         context.fillText(message1, this.game.width * 0.5, this.game.height * 0.5 - 40); // -40 moves the text up 40px
         context.font = '25px ' + this.fontFamily;
         context.fillText(message2, this.game.width * 0.5, this.game.height * 0.5 + 40); // +40 moves the text down 40px
+      }
+
+      // ammo
+      if(this.game.player.powerUp){
+        context.fillStyle = '#ffffbd'
+      }
+      for (let i = 0; i < this.game.ammo; i++) {
+        context.fillRect(20 + 5 * i, 50, 3, 20); // uses index from for loop to space UI ammo elements out (5 * i), plus 20px left margin
       }
       context.restore()                         // restore the canvas to the state it was in before the save method
     }
@@ -354,7 +387,7 @@ window.addEventListener('load', function() {
       this.background.update() // update background layers
       this.background.layer4.update() // draws the foreground layer last, so that it appears on top of the player layer
 
-      this.player.update(); // takes this.player property, and calls an instance of Player method, and calls its update method.
+      this.player.update(deltaTime); // takes this.player property, and calls an instance of Player method, and calls its update method.
       //console.log(this.ammo, this.ammoTimer, this.ammoInterval) // test ammo counter, disabled for performance
 
       if(this.ammoTimer > this.ammoInterval){
@@ -371,6 +404,11 @@ window.addEventListener('load', function() {
         enemy.update();
         if(this.checkCollision(this.player, enemy)){
           enemy.markedForDeletion = true;
+          if(enemy.type = 'lucky'){
+            this.player.enterPowerUp()  // enter power up mode if player collides with lucky enemy
+          } else {
+            this.score--                // subtract 1 from score if player collides with enemy
+          }
         }
         this.player.projectiles.forEach(projectile => {
           if (this.checkCollision(projectile, enemy)) {
