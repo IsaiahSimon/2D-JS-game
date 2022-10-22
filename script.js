@@ -114,6 +114,13 @@ window.addEventListener('load', function() {
         this.speedY = 0
       }
 
+      // vertical boundaries
+      if(this.y > this.game.height - this.height * 0.5){   // bottom boundary
+        this.y = this.game.height - this.height * 0.5;
+      } else if (this.y < -this.height * 0.5){              // top boundary
+        this.y = -this.height * 0.5;
+      }
+
       this.y += this.speedY;                     // update player position
 
       // handle projectiles
@@ -204,8 +211,10 @@ window.addEventListener('load', function() {
         context.strokeRect(this.x, this.y, this.width, this.height)
       }
       context.drawImage(this.image, this.frameX * this.width, this.frameY * this.height, this.width, this.height, this.x, this.y, this.width, this.height)
-      context.font = '20px Helvetica'
-      context.fillText(this.lives, this.x, this.y)
+      if(this.game.debug){
+        context.font = '20px Helvetica'
+        context.fillText(this.lives, this.x, this.y)
+      }
     }
   }
   class Angler1 extends Enemy {                     // Inherits from Enemy class
