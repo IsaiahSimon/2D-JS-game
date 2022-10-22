@@ -84,7 +84,7 @@ window.addEventListener('load', function() {
       this.angle = 0                         // angle of rotation
       this.va = Math.random() * 0.2 - 0.1     // velocity of angle
       this.bounced = 0
-      this.bottomBouncedBoundary = Math.random() * 100 + 60
+      this.bottomBouncedBoundary = Math.random() * 80 + 60
     }
     update(){
       this.angle += this.va           // update angle
@@ -218,7 +218,9 @@ window.addEventListener('load', function() {
     enterPowerUp(){
       this.powerUpTimer = 0;    // reset timer
       this.powerUp = true;      // turn on power up
-      this.game.ammo = this.game.maxAmmo // reset ammo
+      if(this.game.ammo < this.game.maxAmmo){
+        this.game.ammo = this.game.maxAmmo // reset ammo
+      }
     }
   }
 
@@ -425,7 +427,7 @@ window.addEventListener('load', function() {
       this.gameTime = 0;
       this.gameTimeLimit = 15000;              // time in milliseconds
       this.speed = 1
-      this.debug = true
+      this.debug = false
     }
     update(deltaTime){
       if(!this.gameOver){ // keeps track of time from start of game, and ends game if time limit is reached
@@ -461,7 +463,7 @@ window.addEventListener('load', function() {
             this.particles.push(new Particle(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5)) // create 10 particles for each enemy collides with Player
           }
 
-          if(enemy.type = 'lucky'){
+          if(enemy.type === 'lucky'){
             this.player.enterPowerUp()  // enter power up mode if player collides with lucky enemy
           } else {
             this.score--                // subtract 1 from score if player collides with enemy
@@ -498,14 +500,12 @@ window.addEventListener('load', function() {
         this.enemyTimer += deltaTime
       }
     }
-    draw(context){
+    draw(context){ // controls the order in which the game elements are drawn
       this.background.draw(context)
-      this.player.draw(context);
       this.ui.draw(context);
+      this.player.draw(context);
       this.particles.forEach(particle => particle.draw(context))
-      this.enemies.forEach(enemy => {
-        enemy.draw(context);
-      })
+      this.enemies.forEach(enemy => enemy.draw(context))
       this.background.layer4.draw(context)
     }
     // Adds enemies to the game
