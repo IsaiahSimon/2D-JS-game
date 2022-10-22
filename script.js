@@ -89,7 +89,7 @@ window.addEventListener('load', function() {
     update(){
       this.angle += this.va           // update angle
       this.speedY += this.gravity     // update speedY
-      this.x += this.speedX           // update x
+      this.x -= this.speedX + this.game.speed           // update x
       this.y += this.speedY           // update y affect by gravity
       if(this.y > this.game.height + this.size || this.x < 0 - this.size){ // if particle is off screen
         this.markedForDeletion = true
@@ -102,7 +102,13 @@ window.addEventListener('load', function() {
       }
     }
     draw(context){
-      context.drawImage(this.image, this.frameX * this.spriteSize, this.frameY * this.spriteSize, this.spriteSize, this.spriteSize, this.x, this.y, this.size, this.size) // draw image
+      context.save()
+
+      context.translate(this.x, this.y) // move rotation center point (0,0) to the center of the particle
+      context.rotate(this.angle)        // rotate the particle
+
+      context.drawImage(this.image, this.frameX * this.spriteSize, this.frameY * this.spriteSize, this.spriteSize, this.spriteSize, this.size * -0.5, this.size * -0.5, this.size, this.size) // draw image
+      context.restore()
     }
   }
 
