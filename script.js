@@ -51,6 +51,7 @@ window.addEventListener('load', function() {
       this.height = 3
       this.speed = 3
       this.markedForDeletion = false
+      this.image = document.getElementById('projectile')
   }
   update(){
     this.x += this.speed
@@ -59,8 +60,7 @@ window.addEventListener('load', function() {
     }
   }
   draw(context){
-    context.fillStyle = 'yellow'                 // color of the projectile
-    context.fillRect(this.x, this.y, this.width, this.height)
+    context.drawImage(this.image, this.x, this.y)
   }
 
 }
