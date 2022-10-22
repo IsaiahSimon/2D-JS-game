@@ -204,6 +204,20 @@ window.addEventListener('load', function() {
     }
   }
 
+  class LuckyFish extends Enemy {
+    constructor(game) {
+      super(game)
+      this.width = 99
+      this.height = 95
+      this.y = Math.random() * (this.game.height * 0.9 - this.height);
+      this.image = document.getElementById('lucky')
+      this.frameY = Math.floor(Math.random() * 2)
+      this.lives = 3;
+      this.score = 15
+      this.type = 'lucky'
+    }
+  }
+
   // Handles individual background layers in multilayered parallax background
   class Layer {
     constructor(game, image, speedModifier){
@@ -394,10 +408,12 @@ window.addEventListener('load', function() {
     // Adds enemies to the game
     addEnemy(){
       const randomize = Math.random()
-      if(randomize < 0.5){
+      if(randomize < 0.3){
         this.enemies.push(new Angler1(this));
-      } else {
+      } else if (randomize < 0.6){
         this.enemies.push(new Angler2(this));
+      } else {
+        this.enemies.push(new LuckyFish(this));
       }
 
       //console.log(this.enemies)
