@@ -299,7 +299,7 @@ window.addEventListener('load', function() {
     constructor(game){
       this.game = game;
       this.fontSize = 25;
-      this.fontFamily = 'Helvetica';
+      this.fontFamily = 'Bangers';
       this.color = 'white';
     }
     draw(context){
@@ -323,16 +323,16 @@ window.addEventListener('load', function() {
         let message1;
         let message2;
         if(this.game.score > this.game.winningScore){
-          message1 = 'You Win!'
-          message2 = 'Well Done!'
+          message1 = 'Most Wondrous!'
+          message2 = 'Well done explorer!'
         } else {
-          message1 = 'You Lose!'
-          message2 = 'Try Again next time!'
+          message1 = 'Blazes!'
+          message2 = 'Get my repair kit and try again!'
         }
-        context.font = '50px ' + this.fontFamily;
-        context.fillText(message1, this.game.width * 0.5, this.game.height * 0.5 - 40); // -40 moves the text up 40px
-        context.font = '25px ' + this.fontFamily;
-        context.fillText(message2, this.game.width * 0.5, this.game.height * 0.5 + 40); // +40 moves the text down 40px
+        context.font = '70px ' + this.fontFamily;
+        context.fillText(message1, this.game.width * 0.5, this.game.height * 0.5 - 20); // -40 moves the text up 40px
+        context.font = '35px ' + this.fontFamily;
+        context.fillText(message2, this.game.width * 0.5, this.game.height * 0.5 + 30); // +40 moves the text down 40px
       }
 
       // ammo
