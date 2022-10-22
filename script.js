@@ -84,11 +84,18 @@ window.addEventListener('load', function() {
       this.x = 20;
       this.y = 100;
 
+      // Helper variables
+      this.frameX = 0              // frameX and frameY are used to determine which frame of the sprite sheet to draw
+      this.frameY = 0              // toggle between 0 and 1 to see power up animation state
+      this.maxFrame = 37
+
       // Player speed
       this.speedY = 0;        // -1 means player will move up, 1 means player will move down, 0 means player will not move
       this.maxSpeed = 5;      // max speed player can move, allows dynamic speed changes in update method for power ups
 
       this.projectiles = []   // holds all currently active projectile objects
+
+      this.image = document.getElementById('player') // get player image from html
     }
     // Moves the player around the screen
     update(){
@@ -107,11 +114,19 @@ window.addEventListener('load', function() {
         projectile.update()
       })
       this.projectiles = this.projectiles.filter(projectile => !projectile.markedForDeletion) // filter out projectiles that are marked for deletion, and overwrite the projectiles array with the new array
+
+      // handle sprite animation
+      if (this.frameX < this.maxFrame){
+        this.frameX++
+      } else {
+        this.frameX = 0
+      }
     }
     // Draws grapics representing the player, context will specify which canvas element to draw on, better to use context rather than pulling ctx variable from outside into this object
     draw(context){
       context.fillStyle = 'black'               // prevents yellow style from projectice class from affecting player
       context.fillRect(this.x, this.y, this.width, this.height);
+      context.drawImage(this.image, this.frameX * this.width, this.frameY * this.height, this.width, this.height, this.x, this.y, this.width, this.height) // draw player image, using 9 argument version of .drawImage. (1 img + 4 source + 4 destination)
       // handle projectiles
       this.projectiles.forEach(projectile => {
         projectile.draw(context)
