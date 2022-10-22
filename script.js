@@ -65,11 +65,45 @@ window.addEventListener('load', function() {
 
 }
 
-
-
   // Handles falling screws, cogs, and bolts from damaged enemies
   class Particle {
+    constructor(game, x, y){
+      this.game = game
+      this.x = x
+      this.y = y
+      this.image = document.getElementById('gears')
+      this.frameX = Math.floor(Math.random() * 3)
+      this.frameY = Math.floor(Math.random() * 3)
+      this.spriteSize = 50
+      this.sizeModifier = (Math.random() * 0.5 + 0.5).toFixed(1) // random number between 0.5 and 1
+      this.size = this.spriteSize * this.sizeModifier // random particle size
+      this.speedX = Math.random() * 6 - 3         // random speed between -3 and 3
+      this.speedY = Math.random() * -15         // random speed between -15 and 0 (negative so it goes up)
+      this.gravity = 0.5                      // gravity constant
+      this.markedForDeletion = false
+      this.angle = 0                         // angle of rotation
+      this.va = Math.random() * 0.2 - 0.1     // velocity of angle
+      this.bounced = 0
+      this.bottomBouncedBoundary = Math.random() * 100 + 60
+    }
+    update(){
+      this.angle += this.va           // update angle
+      this.speedY += this.gravity     // update speedY
+      this.x += this.speedX           // update x
+      this.y += this.speedY           // update y affect by gravity
+      if(this.y > this.game.height + this.size || this.x < 0 - this.size){ // if particle is off screen
+        this.markedForDeletion = true
+      }
 
+      // bounce off bottom of screen
+      if(this.y > this.game.height - this.bottomBouncedBoundary && this.bounced < 2){
+        this.bounced++
+        this.speedY *= -0.5
+      }
+    }
+    draw(context){
+      context.drawImage(this.image, this.frameX * this.spriteSize, this.frameY * this.spriteSize, this.spriteSize, this.spriteSize, this.x, this.y, this.size, this.size) // draw image
+    }
   }
 
   // Controls the main character, animate player sprite sheet
@@ -371,6 +405,7 @@ window.addEventListener('load', function() {
       this.ui = new UI(this);                   // `this` arg refers to the entire Game class
       this.keys = [];                           // array to store all keys pressed by user
       this.enemies = [];
+      this.particles = []
       this.enemyTimer = 0;
       this.enemyInterval = 1000;
 
@@ -408,11 +443,18 @@ window.addEventListener('load', function() {
         this.ammoTimer += deltaTime
       }
 
+      this.particles.forEach(particle => particle.update())
+      this.particles = this.particles.filter(particle => !particle.markedForDeletion) // removes all particles marked for deletion
+
       // Cycle through all enemies in enemies array, and call their update method
       this.enemies.forEach(enemy => {
         enemy.update();
         if(this.checkCollision(this.player, enemy)){
           enemy.markedForDeletion = true;
+          for (let i = 0; i < 10; i++) {
+            this.particles.push(new Particle(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5)) // create 10 particles for each enemy collides with Player
+          }
+
           if(enemy.type = 'lucky'){
             this.player.enterPowerUp()  // enter power up mode if player collides with lucky enemy
           } else {
@@ -423,8 +465,15 @@ window.addEventListener('load', function() {
           if (this.checkCollision(projectile, enemy)) {
             enemy.lives--;
             projectile.markedForDeletion = true;
+            this.particles.push(new Particle(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5)) // particle effect for each enemy hit by Player projectile
+
             if(enemy.lives <= 0){
+              for (let i = 0; i < 10; i++) {
+                this.particles.push(new Particle(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5)) // create 10 particles for each enemy killed
+              }
+
               enemy.markedForDeletion = true;
+
               if (!this.gameOver){
                 this.score += enemy.score
               }
@@ -447,6 +496,7 @@ window.addEventListener('load', function() {
       this.background.draw(context)
       this.player.draw(context);
       this.ui.draw(context);
+      this.particles.forEach(particle => particle.draw(context))
       this.enemies.forEach(enemy => {
         enemy.draw(context);
       })
