@@ -13,7 +13,7 @@ window.addEventListener('load', function() {
   const ctx = canvas.getContext('2d');
 
   // Game Area
-  canvas.width = 1500;
+  canvas.width = 1000;
   canvas.height = 500;
 
   // Keeps track of user input (keyboard)
@@ -267,7 +267,7 @@ window.addEventListener('load', function() {
       this.y = Math.random() * (this.game.height * 0.95 - this.height); // random y position between 0 to 90% from the top of the screen, offset by the height of the enemy
       this.image = document.getElementById('angler1')
       this.frameY = Math.floor(Math.random() * 3)   // random frameY for sprite sheet
-      this.lives = 2;
+      this.lives = 5;
       this.score = this.lives;
     }
   }
@@ -280,7 +280,7 @@ window.addEventListener('load', function() {
       this.y = Math.random() * (this.game.height * 0.95 - this.height);
       this.image = document.getElementById('angler2')
       this.frameY = Math.floor(Math.random() * 2)
-      this.lives = 3;
+      this.lives = 6;
       this.score = this.lives;
     }
   }
@@ -293,7 +293,7 @@ window.addEventListener('load', function() {
       this.y = Math.random() * (this.game.height * 0.95 - this.height);
       this.image = document.getElementById('lucky')
       this.frameY = Math.floor(Math.random() * 2)
-      this.lives = 3;
+      this.lives = 5;
       this.score = 15
       this.type = 'lucky'
     }
@@ -307,7 +307,7 @@ window.addEventListener('load', function() {
       this.y = Math.random() * (this.game.height * 0.95 - this.height);
       this.image = document.getElementById('hivewhale')
       this.frameY = 0 // only has 1 animation row
-      this.lives = 15
+      this.lives = 20
       this.score = 15
       this.type = 'hive'
       this.speedX = Math.random() * -1.2 - 0.2  // slow down this enemy
@@ -496,17 +496,17 @@ window.addEventListener('load', function() {
       this.particles = [];
       this.explosions = [];
       this.enemyTimer = 0;
-      this.enemyInterval = 1000;
+      this.enemyInterval = 2000;
 
       this.ammo = 20;                           // ammo counter
       this.maxAmmo = 50;
       this.ammoTimer = 0;
-      this.ammoInterval = 500;                 // time in milliseconds between ammo replinishment
+      this.ammoInterval = 350;                 // time in milliseconds between ammo replinishment
       this.gameOver = false;
       this.score = 0;
-      this.winningScore = 10;
+      this.winningScore = 80;
       this.gameTime = 0;
-      this.gameTimeLimit = 15000;              // time in milliseconds
+      this.gameTimeLimit = 35000 ;              // time in milliseconds
       this.speed = 1
       this.debug = false
     }
@@ -550,7 +550,7 @@ window.addEventListener('load', function() {
 
           if(enemy.type === 'lucky'){
             this.player.enterPowerUp()  // enter power up mode if player collides with lucky enemy
-          } else {
+          } else if (!this.gameOver){
             this.score--                // subtract 1 from score if player collides with enemy
           }
         }
@@ -577,9 +577,9 @@ window.addEventListener('load', function() {
               if (!this.gameOver){
                 this.score += enemy.score
               }
-              if(this.score > this.winningScore){
-                this.gameOver = true;
-              }
+              // if(this.score > this.winningScore){  // if score is greater than winning score, end game
+              //   this.gameOver = true;
+              // }
             }
           }
         })
@@ -608,7 +608,7 @@ window.addEventListener('load', function() {
         this.enemies.push(new Angler1(this));
       } else if (randomize < 0.6){
         this.enemies.push(new Angler2(this));
-      } else if (randomize < 0.8) {
+      } else if (randomize < 0.7) {
         this.enemies.push(new HiveWhale(this));
       } else {
         this.enemies.push(new LuckyFish(this));
