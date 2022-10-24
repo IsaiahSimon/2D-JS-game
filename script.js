@@ -376,6 +376,52 @@ window.addEventListener('load', function() {
     }
   }
 
+  class Explosion {
+    constructor(game, x, y){
+      this.game = game;
+      this.x = x;
+      this.y = y;
+      this.frameX = 0;
+      this.spriteHeight = 200;
+      this.fps = 30;          // can change this to make the explosion animation faster or slower
+      this.timer = 0;
+      this.interval = 1000/this.fps;
+      this.markedForDeletion = false;
+      this.maxFrame = 8;
+    }
+    update(deltaTime){
+      this.x -= this.game.speed;
+      if(this.timer > this.interval){ // if the timer is greater than the interval, then we want to update the frame
+        this.frameX++;
+        this.timer = 0;
+      } else {
+        this.timer += deltaTime; // if the timer is not greater than the interval, then we want to add the deltaTime to the timer
+      }
+
+      if(this.frameX > this.maxFrame){
+        this.markedForDeletion = true;
+      }
+    }
+    draw(context){
+      context.drawImage(this.image, this.frameX * this.spriteWidth, 0, this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height); // draw the explosion
+    }
+  }
+
+  class SmokeExplosion extends Explosion {
+    constructor(game, x, y){
+      super(game, x, y)
+      this.image = document.getElementById('smokeExplosion');
+      this.spriteWidth = 200;
+      this.width = this.spriteWidth;
+      this.height = this.spriteHeight;
+      this.x = x - this.width * 0.5;
+      this.y = y - this.height * 0.5;
+    }
+  }
+  class FireExplosion extends Explosion {
+
+  }
+
   // Will draw score, timer and other info to be displayed for the user
   class UI {
     constructor(game){
@@ -444,7 +490,8 @@ window.addEventListener('load', function() {
       this.ui = new UI(this);                   // `this` arg refers to the entire Game class
       this.keys = [];                           // array to store all keys pressed by user
       this.enemies = [];
-      this.particles = []
+      this.particles = [];
+      this.explosions = [];
       this.enemyTimer = 0;
       this.enemyInterval = 1000;
 
@@ -485,11 +532,15 @@ window.addEventListener('load', function() {
       this.particles.forEach(particle => particle.update())
       this.particles = this.particles.filter(particle => !particle.markedForDeletion) // removes all particles marked for deletion
 
+      this.explosions.forEach(explosion => explosion.update(deltaTime))
+      this.explosions = this.explosions.filter(explosion => !explosion.markedForDeletion) // removes all explosions marked for deletion
+
       // Cycle through all enemies in enemies array, and call their update method
       this.enemies.forEach(enemy => {
         enemy.update();
         if(this.checkCollision(this.player, enemy)){
           enemy.markedForDeletion = true;
+          this.addExplosion(enemy); // adds explosion when enemy collides with player
           for (let i = 0; i < enemy.score; i++) {
             this.particles.push(new Particle(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5)) // create 10 particles for each enemy collides with Player
           }
@@ -512,6 +563,7 @@ window.addEventListener('load', function() {
               }
 
               enemy.markedForDeletion = true;
+              this.addExplosion(enemy);
 
               if(enemy.type === 'hive'){
                 for(let i = 0; i < 5; i++){
@@ -543,6 +595,7 @@ window.addEventListener('load', function() {
       this.player.draw(context);
       this.particles.forEach(particle => particle.draw(context))
       this.enemies.forEach(enemy => enemy.draw(context))
+      this.explosions.forEach(explosion => explosion.draw(context))
       this.background.layer4.draw(context)
     }
     // Adds enemies to the game
@@ -559,6 +612,13 @@ window.addEventListener('load', function() {
       }
 
       //console.log(this.enemies)
+    }
+    addExplosion(enemy){
+      const randomize = Math.random();
+      if (randomize < 1){
+        this.explosions.push(new SmokeExplosion(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5));
+      }
+      //console.log(this.explosions);
     }
     checkCollision(rect1, rect2){
       // check if two rectangles are colliding
@@ -582,9 +642,8 @@ window.addEventListener('load', function() {
     lastTime = timeStamp;
     // Clear the canvas between frames
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    game.update(deltaTime);
     game.draw(ctx);
+    game.update(deltaTime);
 
     requestAnimationFrame(animate);                      // tells the browser that you wish to perform an animation and requests that the browser call a specified function to update an animation before the next repaint.
     // requestAnimationFrame has a special feature:  auto passes a time stamp as an argument to the function it calls (animate).
