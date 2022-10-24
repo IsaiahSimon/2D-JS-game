@@ -308,7 +308,7 @@ window.addEventListener('load', function() {
       this.image = document.getElementById('hivewhale')
       this.frameY = 0 // only has 1 animation row
       this.lives = 20
-      this.score = 15
+      this.score = this.lives
       this.type = 'hive'
       this.speedX = Math.random() * -1.2 - 0.2  // slow down this enemy
     }
@@ -327,6 +327,20 @@ window.addEventListener('load', function() {
       this.score = this.lives
       this.type = 'drone'
       this.speedX = Math.random() * -4.2 - 0.5 // random speed range
+    }
+  }
+
+  class BulbWhale extends Enemy {
+    constructor(game) {
+      super(game)
+      this.width = 270
+      this.height = 219
+      this.y = Math.random() * (this.game.height * 0.95 - this.height);
+      this.image = document.getElementById('bulbwhale')
+      this.frameY = Math.floor(Math.random() * 2) // random row from sprite sheet
+      this.lives = 20
+      this.score = this.lives
+      this.speedX = Math.random() * -1.2 - 0.2  // slow down this enemy
     }
   }
 
@@ -610,6 +624,8 @@ window.addEventListener('load', function() {
         this.enemies.push(new Angler2(this));
       } else if (randomize < 0.7) {
         this.enemies.push(new HiveWhale(this));
+      } else if (randomize < 0.8) {
+        this.enemies.push(new BulbWhale(this));
       } else {
         this.enemies.push(new LuckyFish(this));
       }
