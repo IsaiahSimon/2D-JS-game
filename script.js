@@ -41,6 +41,42 @@ window.addEventListener('load', function() {
     }
   }
 
+  // Handles sound effects
+  class SoundController {
+    constructor(){
+      this.powerUpSound = document.getElementById('powerup');
+      this.powerDownSound = document.getElementById('powerdown');
+      this.explosionSound = document.getElementById('explosion');
+      this.shotSound = document.getElementById('shot');
+      this.hitSound = document.getElementById('hit');
+      this.shieldSound = document.getElementById('shield');
+    }
+    powerUp(){
+      this.powerUpSound.currentTime = 0; // reset sound to beginning
+      this.powerUpSound.play();
+    }
+    powerDown() {
+      this.powerDownSound.currentTime = 0;
+      this.powerDownSound.play();
+    }
+    explosion() {
+      this.explosionSound.currentTime = 0;
+      this.explosionSound.play();
+    }
+    shot() {
+      this.shotSound.currentTime = 0;
+      this.shotSound.play();
+    }
+    hit() {
+      this.hitSound.currentTime = 0;
+      this.hitSound.play();
+    }
+    shield() {
+      this.shieldSound.currentTime = 0;
+      this.shieldSound.play();
+    }
+  }
+
   // Handles player lazers
   class Projectile {
     constructor(game, x, y){
@@ -63,7 +99,7 @@ window.addEventListener('load', function() {
     context.drawImage(this.image, this.x, this.y)
   }
 
-}
+  }
 
   // Handles falling screws, cogs, and bolts from damaged enemies
   class Particle {
@@ -182,6 +218,7 @@ window.addEventListener('load', function() {
           this.powerUpTimer = 0;          // reset timer
           this.powerUp = false;           // turn off power up
           this.frameY = 0                 // reset to normal animation
+          this.game.sound.powerDown();
         } else {
           this.powerUpTimer += deltaTime  // increment timer
           this.frameY = 1                 // change animation to power up
@@ -205,6 +242,7 @@ window.addEventListener('load', function() {
         this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 30))
         this.game.ammo--                                                     // decrement ammo
       }
+      this.game.sound.shot();
       if(this.powerUp){                                                      // if power up is active, shoot 2 projectiles
         this.shootBottom()
       }
@@ -218,9 +256,8 @@ window.addEventListener('load', function() {
     enterPowerUp(){
       this.powerUpTimer = 0;    // reset timer
       this.powerUp = true;      // turn on power up
-      if(this.game.ammo < this.game.maxAmmo){
-        this.game.ammo = this.game.maxAmmo // reset ammo
-      }
+      if(this.game.ammo < this.game.maxAmmo) this.game.ammo = this.game.maxAmmo // reset ammo
+      this.game.sound.powerUp(); // play power up sound
     }
   }
 
@@ -520,6 +557,7 @@ window.addEventListener('load', function() {
 
       this.input = new InputHandler(this);      // `this` arg refers to the entire Game class
       this.ui = new UI(this);                   // `this` arg refers to the entire Game class
+      this.sound = new SoundController();             // `this` arg refers to the entire Game class
       this.keys = [];                           // array to store all keys pressed by user
       this.enemies = [];
       this.particles = [];
@@ -573,6 +611,8 @@ window.addEventListener('load', function() {
         if(this.checkCollision(this.player, enemy)){
           enemy.markedForDeletion = true;
           this.addExplosion(enemy); // adds explosion when enemy collides with player
+          this.sound.hit();
+
           for (let i = 0; i < enemy.score; i++) {
             this.particles.push(new Particle(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5)) // create 10 particles for each enemy collides with Player
           }
@@ -596,6 +636,7 @@ window.addEventListener('load', function() {
 
               enemy.markedForDeletion = true;
               this.addExplosion(enemy);
+              this.sound.explosion();
 
               if(enemy.type === 'moon'){
                 this.player.enterPowerUp()  // enter power up mode if player kills moon enemy
